@@ -404,7 +404,7 @@ if portal_mode == "📋 Assessment Desk (Building Permit)":
                         <div class="op-row"><span>Local Gov't Share (80%)</span> <span>{local_share:,.2f}</span></div>
                         <div class="op-row"><span>National Gov't Share (20%)</span> <span>{nat_share:,.2f}</span></div>
                     </div>
-                    <div style="margin-top: 15px; font-size: 11px;">
+                    <div style="margin-top: 35px; font-size: 11px;">
                         <strong>Assessed by:</strong><br>
                         ENGR. AIRSAD R. OLOMODIN <br>
                         OIC-Building Official / Engineer III
@@ -559,7 +559,7 @@ elif portal_mode == "🔍 Occupancy & Post-Construction":
                     <div class="op-row"><span>Local Gov't Share (80%)</span> <span>{p_local:,.2f}</span></div>
                     <div class="op-row"><span>National Gov't Share (20%)</span> <span>{p_nat:,.2f}</span></div>
                 </div>
-                <div style="margin-top: 15px; font-size: 11px;">
+                <div style="margin-top: 35px; font-size: 11px;">
                     <strong>Approved by:</strong><br>
                     ENGR. AIRSAD R. OLOMODIN <br>
                     OIC-Building Official / Engineer III
