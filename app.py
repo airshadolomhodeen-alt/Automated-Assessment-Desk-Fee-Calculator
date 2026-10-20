@@ -18,7 +18,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS for Government Desktop Theme
+# Custom CSS for Government Desktop Theme with Logo Banner
 st.markdown("""
 <style>
     .stApp {
@@ -44,6 +44,17 @@ st.markdown("""
         text-align: center;
         box-shadow: 0px 3px 6px rgba(0,0,0,0.15);
         margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+    }
+    .bpfau-banner img {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        border: 2px solid #ffd700;
+        object-fit: cover;
     }
     .bpfau-banner h4 {
         margin: 0; font-size: 13px; letter-spacing: 1.5px; color: #d1e8ff; text-transform: uppercase;
@@ -80,12 +91,15 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# LGU Banner
+# LGU Banner with Logo Integration
 st.markdown("""
 <div class="bpfau-banner">
-    <h4>Republic of the Philippines</h4>
-    <h2>OFFICE OF THE BUILDING OFFICIAL / BEZA DESK</h2>
-    <p>"Automated Assessment Desk & Printable Order of Payment Generator"</p>
+    <img src="app/static/BEZA-LOGO-Copy-300x300.png" onerror="this.src='BEZA-LOGO-Copy-300x300.png'">
+    <div>
+        <h4>Republic of the Philippines</h4>
+        <h2>OFFICE OF THE BUILDING OFFICIAL / BEZA DESK</h2>
+        <p>"Automated Assessment Desk & Printable Order of Payment Generator"</p>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -308,6 +322,7 @@ if portal_mode == "📋 Assessment Desk (Building Permit)":
             <style>
                 body {{ background: #f4f4f4; padding: 10px; font-family: 'Courier New', Courier, monospace; }}
                 .op-receipt {{
+                    position: relative;
                     background-color: #ffffff;
                     border: 1px solid #111;
                     padding: 20px;
@@ -316,6 +331,22 @@ if portal_mode == "📋 Assessment Desk (Building Permit)":
                     max-width: 450px;
                     margin: auto;
                     box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                }}
+                .op-watermark {{
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 280px;
+                    height: 280px;
+                    opacity: 0.10;
+                    z-index: 0;
+                    pointer-events: none;
+                }}
+                .op-content {{
+                    position: relative;
+                    z-index: 1;
                 }}
                 .op-header {{
                     text-align: center;
@@ -360,41 +391,44 @@ if portal_mode == "📋 Assessment Desk (Building Permit)":
             </head>
             <body>
             <div class="op-receipt">
-                <div class="op-header">
-                    {header_title}<br>
-                    BUILDING PERMIT ORDER OF PAYMENT
+                <img src="BEZA-LOGO-Copy-300x300.png" class="op-watermark">
+                <div class="op-content">
+                    <div class="op-header">
+                        {header_title}<br>
+                        BUILDING PERMIT ORDER OF PAYMENT
+                    </div>
+                    <div class="op-row"><span>Tracking No:</span> <span>{tracking_no}</span></div>
+                    <div class="op-row"><span>Applicant:</span> <span>{applicant_name}</span></div>
+                    <div class="op-row"><span>Date:</span> <span>{datetime.datetime.now().strftime("%m/%d/%Y")}</span></div>
+                    <hr style="border-top: 1px dashed #000; margin: 8px 0;">
+                    {receipt_rows}
+                    <div class="op-total">
+                        <div class="op-row"><span>Total Assessment</span> <span>{total_assessment:,.2f}</span></div>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <div class="op-row"><span>Local Gov't Share (80%)</span> <span>{local_share:,.2f}</span></div>
+                        <div class="op-row"><span>National Gov't Share (20%)</span> <span>{nat_share:,.2f}</span></div>
+                    </div>
+                    <div style="margin-top: 15px; font-size: 11px;">
+                        <strong>Assessed by:</strong><br>
+                        ENGR. AIRSAD R. OLOMODIN<br>
+                        Building Official / Engineer III
+                    </div>
+                    <div style="margin-top: 10px; font-size: 11px; font-style: italic;">
+                        Note: {treasurer_note}
+                    </div>
+                    <div style="margin-top: 10px;">
+                        OR No: ___________________
+                    </div>
+                    <button class="print-btn" onclick="window.print()">🖨️ Print Order of Payment</button>
                 </div>
-                <div class="op-row"><span>Tracking No:</span> <span>{tracking_no}</span></div>
-                <div class="op-row"><span>Applicant:</span> <span>{applicant_name}</span></div>
-                <div class="op-row"><span>Date:</span> <span>{datetime.datetime.now().strftime("%m/%d/%Y")}</span></div>
-                <hr style="border-top: 1px dashed #000; margin: 8px 0;">
-                {receipt_rows}
-                <div class="op-total">
-                    <div class="op-row"><span>Total Assessment</span> <span>{total_assessment:,.2f}</span></div>
-                </div>
-                <div style="margin-top: 10px;">
-                    <div class="op-row"><span>Local Gov't Share (80%)</span> <span>{local_share:,.2f}</span></div>
-                    <div class="op-row"><span>National Gov't Share (20%)</span> <span>{nat_share:,.2f}</span></div>
-                </div>
-                <div style="margin-top: 15px; font-size: 11px;">
-                    <strong>Assessed by:</strong><br>
-                    ENGR. AIRSAD R. OLOMODIN <br>
-                    Building Official / Engineer III
-                </div>
-                <div style="margin-top: 10px; font-size: 11px; font-style: italic;">
-                    Note: {treasurer_note}
-                </div>
-                <div style="margin-top: 10px;">
-                    OR No: ___________________
-                </div>
-                <button class="print-btn" onclick="window.print()">🖨️ Print Order of Payment</button>
             </div>
             </body>
             </html>
             """
             components.html(receipt_html, height=540, scrolling=True)
 
-# --- VIEW 2: OCCUPANCY & POST-CONSTRUCTION STAGE ---
+# --- VIEW 2: OCCUPANCY & POST-CONSTRUCTION ---
 elif portal_mode == "🔍 Occupancy & Post-Construction":
     st.markdown("""
     <div class="section-title-bar">
@@ -444,6 +478,7 @@ elif portal_mode == "🔍 Occupancy & Post-Construction":
         <style>
             body {{ background: #f4f4f4; padding: 10px; font-family: 'Courier New', Courier, monospace; }}
             .op-receipt {{
+                position: relative;
                 background-color: #ffffff;
                 border: 1px solid #111;
                 padding: 20px;
@@ -452,6 +487,22 @@ elif portal_mode == "🔍 Occupancy & Post-Construction":
                 max-width: 450px;
                 margin: auto;
                 box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                overflow: hidden;
+            }}
+            .op-watermark {{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 280px;
+                height: 280px;
+                opacity: 0.10;
+                z-index: 0;
+                pointer-events: none;
+            }}
+            .op-content {{
+                position: relative;
+                z-index: 1;
             }}
             .op-header {{
                 text-align: center;
@@ -496,33 +547,36 @@ elif portal_mode == "🔍 Occupancy & Post-Construction":
         </head>
         <body>
         <div class="op-receipt">
-            <div class="op-header">
-                {p_header}<br>
-                OCCUPANCY & INSPECTION ORDER OF PAYMENT
+            <img src="BEZA-LOGO-Copy-300x300.png" class="op-watermark">
+            <div class="op-content">
+                <div class="op-header">
+                    {p_header}<br>
+                    OCCUPANCY & INSPECTION ORDER OF PAYMENT
+                </div>
+                <div class="op-row"><span>Tracking No:</span> <span>{lookup_track}</span></div>
+                <div class="op-row"><span>Status:</span> <span style="color: green; font-weight: bold;">PROJECT COMPLETED</span></div>
+                <hr style="border-top: 1px dashed #000; margin: 8px 0;">
+                {post_rows}
+                <div class="op-total">
+                    <div class="op-row"><span>Total Assessment</span> <span>{total_post:,.2f}</span></div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <div class="op-row"><span>Local Gov't Share (80%)</span> <span>{p_local:,.2f}</span></div>
+                    <div class="op-row"><span>National Gov't Share (20%)</span> <span>{p_nat:,.2f}</span></div>
+                </div>
+                <div style="margin-top: 15px; font-size: 11px;">
+                    <strong>Approved by:</strong><br>
+                    ENGR. AIRSAD R. OLOMODIN<br>
+                    Building Official / Engineer III
+                </div>
+                <div style="margin-top: 10px; font-size: 11px; font-style: italic;">
+                    Note: {p_note}
+                </div>
+                <div style="margin-top: 10px;">
+                    OR No: ___________________
+                </div>
+                <button class="print-btn" onclick="window.print()">🖨️ Print Occupancy Order of Payment</button>
             </div>
-            <div class="op-row"><span>Tracking No:</span> <span>{lookup_track}</span></div>
-            <div class="op-row"><span>Status:</span> <span style="color: green; font-weight: bold;">PROJECT COMPLETED</span></div>
-            <hr style="border-top: 1px dashed #000; margin: 8px 0;">
-            {post_rows}
-            <div class="op-total">
-                <div class="op-row"><span>Total Assessment</span> <span>{total_post:,.2f}</span></div>
-            </div>
-            <div style="margin-top: 10px;">
-                <div class="op-row"><span>Local Gov't Share (80%)</span> <span>{p_local:,.2f}</span></div>
-                <div class="op-row"><span>National Gov't Share (20%)</span> <span>{p_nat:,.2f}</span></div>
-            </div>
-            <div style="margin-top: 15px; font-size: 11px;">
-                <strong>Approved by:</strong><br>
-                ENGR. AIRSAD R. OLOMODIN, PhD, PECE<br>
-                Building Official / Economic Zone Engineer
-            </div>
-            <div style="margin-top: 10px; font-size: 11px; font-style: italic;">
-                Note: {p_note}
-            </div>
-            <div style="margin-top: 10px;">
-                OR No: ___________________
-            </div>
-            <button class="print-btn" onclick="window.print()">🖨️ Print Occupancy Order of Payment</button>
         </div>
         </body>
         </html>
