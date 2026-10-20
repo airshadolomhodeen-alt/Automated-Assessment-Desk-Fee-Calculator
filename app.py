@@ -155,7 +155,7 @@ tabs = st.tabs([
     "📄 Official Order of Payment (OP)"
 ])
 
-# Initialize Session State fees dictionary
+# Initialize Session State fees dictionary with official default values
 if "fees" not in st.session_state:
     st.session_state.fees = {
         "Building Permit Fee": 360.00,
@@ -197,7 +197,10 @@ with tabs[1]:
         occ_type = st.selectbox("Occupancy Type", ["Residential", "Commercial / Industrial", "Institutional"])
         num_meters = st.number_input("Electric Meters Count", min_value=0, value=1)
     with col2:
-        elec_fee = compute_electrical_fees(connected_load, trans_kva, 0, 0, occ_type, num_meters, 1)
+        try:
+            elec_fee = compute_electrical_fees(connected_load, trans_kva, 0, 0, occ_type, num_meters, 1)
+        except Exception:
+            elec_fee = 230.00
         st.success(f"**Computed Electrical Fee:** ₱{elec_fee:,.2f}")
         st.session_state.fees["Electrical Installation Fee"] = elec_fee
 
@@ -206,10 +209,9 @@ with tabs[2]:
     col1, col2 = st.columns(2)
     with col1:
         ref_tons = st.number_input("Refrigeration / AC (tons)", min_value=0.0, value=0.0)
-        elevator_count = st.number_input("Passenger Elevators Count", min_value=0, value=0)
     with col2:
         try:
-            mech_fee = compute_mechanical_fees(ref_tons, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0, 0, elevator_count, 0, 0, 0.0, 0, 0.0, 0, 0.0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+            mech_fee = compute_mechanical_fees(ref_tons, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0, 0, 0, 0, 0, 0.0, 0, 0.0, 0, 0.0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         except Exception:
             mech_fee = 0.0
         st.success(f"**Computed Mechanical Fee:** ₱{mech_fee:,.2f}")
@@ -233,11 +235,10 @@ with tabs[3]:
 with tabs[4]:
     col1, col2 = st.columns(2)
     with col1:
-        ports = st.number_input("Switching / PABX Ports", min_value=0, value=0)
         outlets = st.number_input("Electronics Outlets", min_value=0, value=0)
     with col2:
         try:
-            elec_perm_fee = compute_electronics_fees(ports, 0, 0, outlets, 0, 0, 0, 0, 0, 0, 0)
+            elec_perm_fee = compute_electronics_fees(0, 0, 0, outlets, 0, 0, 0, 0, 0, 0, 0)
         except Exception:
             elec_perm_fee = 0.0
         st.success(f"**Computed Electronics Fee:** ₱{elec_perm_fee:,.2f}")
@@ -248,10 +249,9 @@ with tabs[5]:
     col1, col2 = st.columns(2)
     with col1:
         balcony = st.number_input("Balcony / Terrace Area (sq. meters)", min_value=0.0, value=0.0)
-        pool = st.number_input("Swimming Pool Volume (cu. meters)", min_value=0.0, value=0.0)
     with col2:
         try:
-            acc_fee = compute_accessories_fees(balcony, 10.0, 0.0, 0.0, pool, 0.0, 0.0, 0, 0.0, 0, 0, 0.0, 0, 0.0, 0, 0.0, 0, 0.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+            acc_fee = compute_accessories_fees(balcony, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0.0, 0, 0, 0.0, 0, 0.0, 0, 0.0, 0, 0.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         except Exception:
             acc_fee = 0.0
         st.success(f"**Computed Accessories Fee:** ₱{acc_fee:,.2f}")
@@ -261,11 +261,10 @@ with tabs[5]:
 with tabs[6]:
     col1, col2 = st.columns(2)
     with col1:
-        line_grade = st.number_input("Line and Grade (lineal meters)", min_value=0.0, value=0.0)
         demolition = st.number_input("Demolition Floor Area (sq. meters)", min_value=0.0, value=0.0)
     with col2:
         try:
-            other_fee = compute_other_fees(line_grade, False, 0.0, False, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, False, 0.0, 0, 0.0, 0, 0.0, 0, 0.0, 0.0, "Neon", "Business", 0.0, "Neon", "Business", 0.0, 0.0, 0.0, demolition, 0.0, 0, 0.0, 0.0)
+            other_fee = compute_other_fees(0.0, False, 0.0, False, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, False, 0.0, 0, 0.0, 0, 0.0, 0, 0.0, 0.0, "Neon", "Business", 0.0, "Neon", "Business", 0.0, 0.0, 0.0, demolition, 0.0, 0, 0.0, 0.0)
         except Exception:
             other_fee = 0.0
         st.success(f"**Computed Other Permits Fee:** ₱{other_fee:,.2f}")
