@@ -279,7 +279,7 @@ with tabs[8]:
             local_share = total_assessment * 0.80
             nat_share = total_assessment * 0.20
             header_title = "OFFICE OF THE BUILDING OFFICIAL"
-            treasurer_note = "Please pay at the Municipal Treasurer's Office."
+            treasurer_note = "Please pay at the BEZA Finance / Cashier Office."
 
         receipt_rows = ""
         for item, amount in st.session_state.fees.items():
@@ -342,10 +342,11 @@ with tabs[8]:
             
             <div style="margin-top: 15px; font-size: 11px;">
                 <strong>Assessed by:</strong><br>
-                ENGR. AIRSAD R. OLOMODIN, PhD, PECE<br>
-                Building Official / Economic Zone Engineer
+                ENGR. AIRSAD R. OLOMODIN <br>
+                Building Official / Engineer III
             </div>
             <div style="margin-top: 10px; font-size: 11px; font-style: italic;">
+               
                 Note: {treasurer_note}
             </div>
             <div style="margin-top: 10px;">
