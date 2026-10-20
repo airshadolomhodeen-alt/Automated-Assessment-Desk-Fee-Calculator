@@ -406,8 +406,8 @@ if portal_mode == "📋 Assessment Desk (Building Permit)":
                     </div>
                     <div style="margin-top: 15px; font-size: 11px;">
                         <strong>Assessed by:</strong><br>
-                        ENGR. AIRSAD R. OLOMODIN, PhD, PECE<br>
-                        Building Official / Economic Zone Engineer
+                        ENGR. AIRSAD R. OLOMODIN <br>
+                        OIC-Building Official / Engineer III
                     </div>
                     <div style="margin-top: 10px; font-size: 11px; font-style: italic;">
                         Note: {treasurer_note}
