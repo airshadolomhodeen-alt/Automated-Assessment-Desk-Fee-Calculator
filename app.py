@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import datetime
+import base64
+import os
 import streamlit.components.v1 as components
 from utils.building_fees import compute_building_fee, get_fixed_cost_per_sqm
 from utils.electrical_fees import compute_electrical_fees
@@ -13,12 +15,23 @@ from utils.certificates_fees import compute_occupancy_certificate_fee, compute_a
 
 # Set page config
 st.set_page_config(
-    page_title="Building Permit Fees Assessment Utility | BEZA",
+    page_title="Building Permit Fees Assessment Utility | BEZA / LGU",
     page_icon="🏛️",
     layout="wide"
 )
 
-# Custom CSS for Government Desktop Theme with Logo Banner
+# Function to load and encode image to base64
+def get_base64_image(image_path):
+    if os.path.exists(image_path):
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode("utf-8")
+    return ""
+
+logo_path = "BEZA-LOGO-Copy-300x300.png"
+logo_base64 = get_base64_image(logo_path)
+logo_data_uri = f"data:image/png;base64,{logo_base64}" if logo_base64 else ""
+
+# Custom CSS for Government Desktop Theme
 st.markdown("""
 <style>
     .stApp {
@@ -44,26 +57,6 @@ st.markdown("""
         text-align: center;
         box-shadow: 0px 3px 6px rgba(0,0,0,0.15);
         margin-bottom: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-    }
-    .bpfau-banner img {
-        width: 70px;
-        height: 70px;
-        border-radius: 50%;
-        border: 2px solid #ffd700;
-        object-fit: cover;
-    }
-    .bpfau-banner h4 {
-        margin: 0; font-size: 13px; letter-spacing: 1.5px; color: #d1e8ff; text-transform: uppercase;
-    }
-    .bpfau-banner h2 {
-        margin: 4px 0; font-size: 20px; font-weight: 800; color: #ffffff;
-    }
-    .bpfau-banner p {
-        margin: 0; font-size: 12px; font-style: italic; color: #ffd700;
     }
     .section-title-bar {
         background-color: #0056b3;
@@ -91,17 +84,21 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# LGU Banner with Logo Integration
+# LGU Banner with Native Streamlit Columns for Perfect Logo Alignment
 st.markdown("""
 <div class="bpfau-banner">
-    <img src="app/static/BEZA-LOGO-Copy-300x300.png" onerror="this.src='BEZA-LOGO-Copy-300x300.png'">
-    <div>
-        <h4>Republic of the Philippines</h4>
-        <h2>OFFICE OF THE BUILDING OFFICIAL / BEZA DESK</h2>
-        <p>"Automated Assessment Desk & Printable Order of Payment Generator"</p>
-    </div>
+    <h4 style="margin: 0; font-size: 13px; letter-spacing: 1.5px; color: #d1e8ff; text-transform: uppercase;">Republic of the Philippines</h4>
+    <h2 style="margin: 4px 0; font-size: 20px; font-weight: 800; color: #ffffff;">OFFICE OF THE BUILDING OFFICIAL / BEZA DESK</h2>
+    <p style="margin: 0; font-size: 12px; font-style: italic; color: #ffd700;">"Automated Assessment Desk & Printable Order of Payment Generator"</p>
 </div>
 """, unsafe_allow_html=True)
+
+if logo_base64:
+    col_logo, col_banner_text = st.columns([1, 6])
+    with col_logo:
+        st.image(logo_path, width=90)
+    with col_banner_text:
+        st.empty()
 
 # Initialize Session State Database & Records
 if "applicants_db" not in st.session_state:
@@ -309,7 +306,7 @@ if portal_mode == "📋 Assessment Desk (Building Permit)":
                 local_share = total_assessment * 0.80
                 nat_share = total_assessment * 0.20
                 header_title = "OFFICE OF THE BUILDING OFFICIAL"
-                treasurer_note = "Please pay at the BEZA Finance / Cashier Office."
+                treasurer_note = "Please pay at the Municipal Treasurer's Office."
 
             receipt_rows = ""
             for item, amount in st.session_state.fees.items():
@@ -391,7 +388,7 @@ if portal_mode == "📋 Assessment Desk (Building Permit)":
             </head>
             <body>
             <div class="op-receipt">
-                <img src="BEZA-LOGO-Copy-300x300.png" class="op-watermark">
+                <img src="{logo_data_uri}" class="op-watermark">
                 <div class="op-content">
                     <div class="op-header">
                         {header_title}<br>
@@ -411,8 +408,8 @@ if portal_mode == "📋 Assessment Desk (Building Permit)":
                     </div>
                     <div style="margin-top: 15px; font-size: 11px;">
                         <strong>Assessed by:</strong><br>
-                        ENGR. AIRSAD R. OLOMODIN<br>
-                        Building Official / Engineer III
+                        ENGR. AIRSAD R. OLOMODIN, PhD, PECE<br>
+                        Building Official / Economic Zone Engineer
                     </div>
                     <div style="margin-top: 10px; font-size: 11px; font-style: italic;">
                         Note: {treasurer_note}
@@ -466,7 +463,7 @@ elif portal_mode == "🔍 Occupancy & Post-Construction":
             p_local = total_post * 0.80
             p_nat = total_post * 0.20
             p_header = "OFFICE OF THE BUILDING OFFICIAL"
-            p_note = "Please pay at the BEZA Finance / Cashier Office."
+            p_note = "Please pay at the Municipal Treasurer's Office."
 
         post_rows = ""
         for item, amount in st.session_state.post_fees.items():
@@ -547,7 +544,7 @@ elif portal_mode == "🔍 Occupancy & Post-Construction":
         </head>
         <body>
         <div class="op-receipt">
-            <img src="BEZA-LOGO-Copy-300x300.png" class="op-watermark">
+            <img src="{logo_data_uri}" class="op-watermark">
             <div class="op-content">
                 <div class="op-header">
                     {p_header}<br>
@@ -566,8 +563,8 @@ elif portal_mode == "🔍 Occupancy & Post-Construction":
                 </div>
                 <div style="margin-top: 15px; font-size: 11px;">
                     <strong>Approved by:</strong><br>
-                    ENGR. AIRSAD R. OLOMODIN<br>
-                    Building Official / Engineer III
+                    ENGR. AIRSAD R. OLOMODIN, PhD, PECE<br>
+                    Building Official / Economic Zone Engineer
                 </div>
                 <div style="margin-top: 10px; font-size: 11px; font-style: italic;">
                     Note: {p_note}
