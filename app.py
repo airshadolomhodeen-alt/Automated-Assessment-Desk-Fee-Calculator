@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import textwrap
 from utils.building_fees import compute_building_fee, get_fixed_cost_per_sqm
 from utils.electrical_fees import compute_electrical_fees
 from utils.mechanical_fees import compute_mechanical_fees
@@ -315,7 +316,7 @@ with tabs[8]:
             if amount > 0:
                 receipt_rows += f'<div class="op-row"><span>{item}</span> <span>{amount:,.2f}</span></div>\n'
 
-        st.markdown(f"""
+        receipt_html = textwrap.dedent(f"""
         <div class="op-receipt">
             <div class="op-header">
                 {header_title}<br>
@@ -347,4 +348,6 @@ with tabs[8]:
                 OR No: ___________________
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
+
+        st.markdown(receipt_html, unsafe_allow_html=True)
