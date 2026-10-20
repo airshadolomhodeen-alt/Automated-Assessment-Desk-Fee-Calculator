@@ -13,7 +13,7 @@ from utils.certificates_fees import compute_occupancy_certificate_fee, compute_a
 
 # Set page config
 st.set_page_config(
-    page_title="Building Permit Fees Assessment Utility | BEZA / LGU",
+    page_title="Building Permit Fees Assessment Utility | BEZA",
     page_icon="🏛️",
     layout="wide"
 )
@@ -125,7 +125,11 @@ if "post_fees" not in st.session_state:
 st.sidebar.markdown("### ⚙️ System Controls")
 portal_mode = st.sidebar.radio(
     "Portal View",
-    ["📋 Assessment Desk (Applicant)", "📊 OBO Admin Registry (Manager View)"]
+    [
+        "📋 Assessment Desk (Building Permit)", 
+        "🔍 Occupancy & Post-Construction", 
+        "📊 OBO Admin Registry (Manager View)"
+    ]
 )
 
 authority_mode = st.sidebar.selectbox(
@@ -133,11 +137,11 @@ authority_mode = st.sidebar.selectbox(
     ["Standard LGU (80% Local / 20% National)", "BEZA Economic Zone (Direct Ecozone Assessment)"]
 )
 
-# --- VIEW 1: ASSESSMENT DESK (APPLICANT / ESTIMATOR) ---
-if portal_mode == "📋 Assessment Desk (Applicant)":
+# --- VIEW 1: ASSESSMENT DESK (BUILDING PERMIT) ---
+if portal_mode == "📋 Assessment Desk (Building Permit)":
     st.markdown("""
     <div class="section-title-bar">
-        BUILDING PERMIT APPLICATION & FEE ASSESSMENT UTILITY
+        STAGE 1: BUILDING PERMIT APPLICATION & UPFRONT FEE ASSESSMENT
     </div>
     """, unsafe_allow_html=True)
 
@@ -274,7 +278,6 @@ if portal_mode == "📋 Assessment Desk (Applicant)":
                     "date": datetime.datetime.now().strftime("%m/%d/%Y"),
                     "status": "Pending Payment"
                 }
-                # Check if tracking exists, update or append
                 existing_idx = next((i for i, item in enumerate(st.session_state.applicants_db) if item["tracking_no"] == tracking_no), None)
                 if existing_idx is not None:
                     st.session_state.applicants_db[existing_idx] = new_record
@@ -292,14 +295,13 @@ if portal_mode == "📋 Assessment Desk (Applicant)":
                 local_share = total_assessment * 0.80
                 nat_share = total_assessment * 0.20
                 header_title = "OFFICE OF THE BUILDING OFFICIAL"
-                treasurer_note = "Please pay at the Municipal Treasurer's Office."
+                treasurer_note = "Please pay at the BEZA Finance / Cashier Office."
 
             receipt_rows = ""
             for item, amount in st.session_state.fees.items():
                 if amount > 0:
                     receipt_rows += f'<div class="op-row"><span>{item}</span> <span>{amount:,.2f}</span></div>\n'
 
-            # Printable HTML receipt with native JavaScript window.print() button
             receipt_html = f"""
             <html>
             <head>
@@ -376,8 +378,8 @@ if portal_mode == "📋 Assessment Desk (Applicant)":
                 </div>
                 <div style="margin-top: 15px; font-size: 11px;">
                     <strong>Assessed by:</strong><br>
-                    ENGR. AIRSAD R. OLOMODIN, PhD, PECE<br>
-                    Building Official / Economic Zone Engineer
+                    ENGR. AIRSAD R. OLOMODIN <br>
+                    Building Official / Engineer III
                 </div>
                 <div style="margin-top: 10px; font-size: 11px; font-style: italic;">
                     Note: {treasurer_note}
@@ -392,7 +394,142 @@ if portal_mode == "📋 Assessment Desk (Applicant)":
             """
             components.html(receipt_html, height=540, scrolling=True)
 
-# --- VIEW 2: OBO ADMIN REGISTRY (MANAGER VIEW) ---
+# --- VIEW 2: OCCUPANCY & POST-CONSTRUCTION STAGE ---
+elif portal_mode == "🔍 Occupancy & Post-Construction":
+    st.markdown("""
+    <div class="section-title-bar">
+        STAGE 2: OCCUPANCY CERTIFICATE & POST-CONSTRUCTION INSPECTION DESK
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_s1, col_s2 = st.columns(2)
+    with col_s1:
+        lookup_track = st.text_input("Enter Project Tracking Number", value="OBO-20261020-001")
+        st.info("Loaded project from registry for completion assessment.")
+        
+        valuation = st.session_state.get("building_valuation", 750000.0)
+        floor_area_val = st.session_state.get("floor_area", 75.0)
+        elec_base = st.session_state.fees.get("Electrical Installation Fee", 230.00)
+        
+        occ_cert = compute_occupancy_certificate_fee("A-1", valuation, floor_area_val)
+        bldg_insp = compute_annual_inspection_fees(floor_area_val, 2, elec_base)
+        cert_fee = st.number_input("Certification Fee (₱)", min_value=0.0, value=250.00)
+        
+        st.session_state.post_fees["Building Occupancy Certificate Fee"] = occ_cert
+        st.session_state.post_fees["Annual Inspection Fee"] = bldg_insp
+        st.session_state.post_fees["Certification Fee"] = cert_fee
+
+        total_post = sum(st.session_state.post_fees.values())
+        st.success(f"**Occupancy Certificate Fee:** ₱{occ_cert:,.2f}\n\n**Annual Inspection Fee:** ₱{bldg_insp:,.2f}\n\n### **Total Post-Construction Fee: ₱{total_post:,.2f}**")
+
+    with col_s2:
+        if "BEZA" in authority_mode:
+            p_local = total_post * 1.00
+            p_nat = 0.00
+            p_header = "BANGSAMORO ECONOMIC ZONE AUTHORITY"
+            p_note = "Please pay at the BEZA Finance / Cashier Office."
+        else:
+            p_local = total_post * 0.80
+            p_nat = total_post * 0.20
+            p_header = "OFFICE OF THE BUILDING OFFICIAL"
+            p_note = "Please pay at the BEZA Finance / Cashier Office."
+
+        post_rows = ""
+        for item, amount in st.session_state.post_fees.items():
+            post_rows += f'<div class="op-row"><span>{item}</span> <span>{amount:,.2f}</span></div>\n'
+
+        post_receipt_html = f"""
+        <html>
+        <head>
+        <style>
+            body {{ background: #f4f4f4; padding: 10px; font-family: 'Courier New', Courier, monospace; }}
+            .op-receipt {{
+                background-color: #ffffff;
+                border: 1px solid #111;
+                padding: 20px;
+                font-size: 13px;
+                color: #000;
+                max-width: 450px;
+                margin: auto;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }}
+            .op-header {{
+                text-align: center;
+                font-weight: bold;
+                text-transform: uppercase;
+                border-bottom: 1px dashed #000;
+                padding-bottom: 10px;
+                margin-bottom: 10px;
+            }}
+            .op-row {{
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 4px;
+            }}
+            .op-total {{
+                border-top: 1px dashed #000;
+                border-bottom: 2px double #000;
+                padding: 6px 0;
+                font-weight: bold;
+                margin-top: 10px;
+            }}
+            .print-btn {{
+                display: block;
+                width: 100%;
+                background: #0056b3;
+                color: white;
+                border: none;
+                padding: 10px;
+                font-size: 14px;
+                font-weight: bold;
+                cursor: pointer;
+                margin-top: 15px;
+                border-radius: 4px;
+            }}
+            .print-btn:hover {{ background: #003d82; }}
+            @media print {{
+                body {{ background: #fff; padding: 0; }}
+                .print-btn {{ display: none; }}
+                .op-receipt {{ border: none; box-shadow: none; width: 100%; }}
+            }}
+        </style>
+        </head>
+        <body>
+        <div class="op-receipt">
+            <div class="op-header">
+                {p_header}<br>
+                OCCUPANCY & INSPECTION ORDER OF PAYMENT
+            </div>
+            <div class="op-row"><span>Tracking No:</span> <span>{lookup_track}</span></div>
+            <div class="op-row"><span>Status:</span> <span style="color: green; font-weight: bold;">PROJECT COMPLETED</span></div>
+            <hr style="border-top: 1px dashed #000; margin: 8px 0;">
+            {post_rows}
+            <div class="op-total">
+                <div class="op-row"><span>Total Assessment</span> <span>{total_post:,.2f}</span></div>
+            </div>
+            <div style="margin-top: 10px;">
+                <div class="op-row"><span>Local Gov't Share (80%)</span> <span>{p_local:,.2f}</span></div>
+                <div class="op-row"><span>National Gov't Share (20%)</span> <span>{p_nat:,.2f}</span></div>
+            </div>
+            <div style="margin-top: 15px; font-size: 11px;">
+                <strong>Approved by:</strong><br>
+                ENGR. AIRSAD R. OLOMODIN, PhD, PECE<br>
+                Building Official / Economic Zone Engineer
+            </div>
+            <div style="margin-top: 10px; font-size: 11px; font-style: italic;">
+                Note: {p_note}
+            </div>
+            <div style="margin-top: 10px;">
+                OR No: ___________________
+            </div>
+            <button class="print-btn" onclick="window.print()">🖨️ Print Occupancy Order of Payment</button>
+        </div>
+        </body>
+        </html>
+        """
+        components.html(post_receipt_html, height=520, scrolling=True)
+
+# --- VIEW 3: OBO ADMIN REGISTRY (MANAGER VIEW) ---
 else:
     st.markdown("""
     <div class="section-title-bar">
@@ -401,12 +538,9 @@ else:
     """, unsafe_allow_html=True)
 
     st.subheader("📁 Saved Applications & Project Records")
-    
-    # Convert session state database to DataFrame for tabular display
     df_db = pd.DataFrame(st.session_state.applicants_db)
     
     if not df_db.empty:
-        # Display interactive dataframe with status management
         st.dataframe(df_db, use_container_width=True)
         
         st.markdown("### 🔍 Record Management & Status Update")
