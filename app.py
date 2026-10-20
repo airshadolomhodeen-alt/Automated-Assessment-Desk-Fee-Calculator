@@ -15,7 +15,7 @@ from utils.certificates_fees import compute_occupancy_certificate_fee, compute_a
 
 # Set page config
 st.set_page_config(
-    page_title="Building Permit Fees Assessment Utility | BEZA / LGU",
+    page_title="Building Permit Fees Assessment Utility | BEZA",
     page_icon="🏛️",
     layout="wide"
 )
@@ -306,7 +306,7 @@ if portal_mode == "📋 Assessment Desk (Building Permit)":
                 local_share = total_assessment * 0.80
                 nat_share = total_assessment * 0.20
                 header_title = "OFFICE OF THE BUILDING OFFICIAL"
-                treasurer_note = "Please pay at the Municipal Treasurer's Office."
+                treasurer_note = "Please pay at the BEZA Finance / Cashier Office."
 
             receipt_rows = ""
             for item, amount in st.session_state.fees.items():
@@ -463,7 +463,7 @@ elif portal_mode == "🔍 Occupancy & Post-Construction":
             p_local = total_post * 0.80
             p_nat = total_post * 0.20
             p_header = "OFFICE OF THE BUILDING OFFICIAL"
-            p_note = "Please pay at the Municipal Treasurer's Office."
+            p_note = "Please pay at the BEZA Finance / Cashier Office."
 
         post_rows = ""
         for item, amount in st.session_state.post_fees.items():
@@ -563,8 +563,8 @@ elif portal_mode == "🔍 Occupancy & Post-Construction":
                 </div>
                 <div style="margin-top: 15px; font-size: 11px;">
                     <strong>Approved by:</strong><br>
-                    ENGR. AIRSAD R. OLOMODIN, PhD, PECE<br>
-                    Building Official / Economic Zone Engineer
+                    ENGR. AIRSAD R. OLOMODIN <br>
+                    OIC-Building Official / Engineer III
                 </div>
                 <div style="margin-top: 10px; font-size: 11px; font-style: italic;">
                     Note: {p_note}
