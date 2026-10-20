@@ -121,7 +121,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# LGU & BEZA Header
+# LGU Header
 st.markdown("""
 <div class="bpfau-banner">
     <h4>Republic of the Philippines</h4>
@@ -151,12 +151,12 @@ tabs = st.tabs([
     "📄 Official Order of Payment (OP)"
 ])
 
-# Session state initialization
+# Session state initialization with exact locked default values
 if "fees" not in st.session_state:
     st.session_state.fees = {
         "Electrical Installation Fee": 230.00,
         "Plumbing Installation Fee": 94.00,
-        "Building Occupancy Fee": 100.00,
+        "Building Occupancy Fee": 1.00,
         "Building Inspection Fee": 983.00,
         "Certification Fee": 250.00
     }
@@ -168,14 +168,14 @@ with tabs[0]:
         floor_area = st.number_input("Total Floor Area (SqM)", min_value=1.0, value=500.0)
         cost_val = st.number_input("Building Valuation / Cost (₱)", min_value=0.0, value=0.0)
     with col2:
-        occ_fee = st.number_input("Certificate of Occupancy Fee (₱)", min_value=0.0, value=100.0)
+        occ_fee = st.number_input("Certificate of Occupancy Fee (₱)", min_value=0.0, value=st.session_state.fees["Building Occupancy Fee"])
         st.session_state.fees["Building Occupancy Fee"] = occ_fee
 
 # --- TAB 2: ELECTRICAL ---
 with tabs[1]:
     col1, col2 = st.columns(2)
     with col1:
-        elec_inst = st.number_input("Electrical Installation Fee (₱)", min_value=0.0, value=230.0)
+        elec_inst = st.number_input("Electrical Installation Fee (₱)", min_value=0.0, value=st.session_state.fees["Electrical Installation Fee"])
         st.session_state.fees["Electrical Installation Fee"] = elec_inst
 
 # --- TAB 3: PLUMBING ---
@@ -183,15 +183,15 @@ with tabs[2]:
     col1, col2 = st.columns(2)
     with col1:
         plumb_units = st.number_input("Plumbing Units Count", min_value=1, value=2)
-        plumb_inst = st.number_input("Plumbing Installation Fee (₱)", min_value=0.0, value=94.0)
+        plumb_inst = st.number_input("Plumbing Installation Fee (₱)", min_value=0.0, value=st.session_state.fees["Plumbing Installation Fee"])
         st.session_state.fees["Plumbing Installation Fee"] = plumb_inst
 
 # --- TAB 4: INSPECTIONS & CERTS ---
 with tabs[3]:
     col1, col2 = st.columns(2)
     with col1:
-        bldg_insp = st.number_input("Building Annual Inspection Fee (₱)", min_value=0.0, value=983.0)
-        cert_fee = st.number_input("Certification Fee (5 x ₱50) (₱)", min_value=0.0, value=250.0)
+        bldg_insp = st.number_input("Building Annual Inspection Fee (₱)", min_value=0.0, value=st.session_state.fees["Building Inspection Fee"])
+        cert_fee = st.number_input("Certification Fee (5 x ₱50) (₱)", min_value=0.0, value=st.session_state.fees["Certification Fee"])
         st.session_state.fees["Building Inspection Fee"] = bldg_insp
         st.session_state.fees["Certification Fee"] = cert_fee
 
