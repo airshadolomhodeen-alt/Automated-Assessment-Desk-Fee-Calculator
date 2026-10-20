@@ -121,7 +121,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# LGU Header
+# LGU Banner
 st.markdown("""
 <div class="bpfau-banner">
     <h4>Republic of the Philippines</h4>
@@ -142,61 +142,136 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Navigation Tabs
+# Navigation Tabs linking all modules
 tabs = st.tabs([
-    "🏢 Building & Occupancy", 
+    "🏢 Building Fees", 
     "⚡ Electrical Fees", 
+    "🔧 Mechanical Fees", 
     "🚰 Plumbing Fees", 
-    "🔍 Inspection & Certs",
+    "📡 Electronics Fees", 
+    "🏗️ Accessories", 
+    "📋 Other Fees", 
+    "🔍 Inspections & Certs",
     "📄 Official Order of Payment (OP)"
 ])
 
-# Session state initialization with exact locked default values
+# Initialize Session State fees dictionary
 if "fees" not in st.session_state:
     st.session_state.fees = {
+        "Building Permit Fee": 360.00,
         "Electrical Installation Fee": 230.00,
+        "Mechanical Installation Fee": 0.00,
         "Plumbing Installation Fee": 94.00,
+        "Electronics Permit Fee": 0.00,
+        "Accessories Fee": 0.00,
+        "Other Permits Fee": 0.00,
         "Building Occupancy Fee": 1.00,
         "Building Inspection Fee": 983.00,
         "Certification Fee": 250.00
     }
 
-# --- TAB 1: BUILDING & OCCUPANCY ---
+# --- TAB 1: BUILDING FEES ---
 with tabs[0]:
     col1, col2 = st.columns(2)
     with col1:
-        floor_area = st.number_input("Total Floor Area (SqM)", min_value=1.0, value=500.0)
-        cost_val = st.number_input("Building Valuation / Cost (₱)", min_value=0.0, value=0.0)
+        group_choice = st.selectbox("Occupancy Group", ["Group A-1 (Residential Single)", "Group A-2 (Residential Duplex/Multi)", "Groups B, C, E, F, G, H, I, J-1 (Commercial/Institutional)", "Groups C-2, D (Apartments/Schools)"])
+        floor_area = st.number_input("Total Floor Area (SqM)", min_value=1.0, value=75.0)
+        is_original = st.checkbox("Original Complete Construction", value=True)
     with col2:
-        occ_fee = st.number_input("Certificate of Occupancy Fee (₱)", min_value=0.0, value=st.session_state.fees["Building Occupancy Fee"])
-        st.session_state.fees["Building Occupancy Fee"] = occ_fee
+        division = "A-1" if "A-1" in group_choice else ("A-2" if "A-2" in group_choice else ("B-1" if "Commercial" in group_choice else "C-2"))
+        group = "Group A" if "Group A" in group_choice else "Group B"
+        fixed_rate = get_fixed_cost_per_sqm(group)
+        building_fee = compute_building_fee(division, floor_area, is_original)
+        st.info(f"**Fixed Cost Rate:** ₱{fixed_rate:,.2f}/sqm\n\n**Estimated Valuation:** ₱{floor_area * fixed_rate:,.2f}")
+        st.success(f"**Computed Building Fee:** ₱{building_fee:,.2f}")
+        st.session_state.fees["Building Permit Fee"] = building_fee
+        st.session_state["building_valuation"] = floor_area * fixed_rate
+        st.session_state["floor_area"] = floor_area
 
-# --- TAB 2: ELECTRICAL ---
+# --- TAB 2: ELECTRICAL FEES ---
 with tabs[1]:
     col1, col2 = st.columns(2)
     with col1:
-        elec_inst = st.number_input("Electrical Installation Fee (₱)", min_value=0.0, value=st.session_state.fees["Electrical Installation Fee"])
-        st.session_state.fees["Electrical Installation Fee"] = elec_inst
+        connected_load = st.number_input("Total Connected Load (kVA)", min_value=0.0, value=15.0)
+        trans_kva = st.number_input("Transformer / Generator Capacity (kVA)", min_value=0.0, value=0.0)
+        occ_type = st.selectbox("Occupancy Type", ["Residential", "Commercial / Industrial", "Institutional"])
+    with col2:
+        elec_fee = compute_electrical_fees(connected_load, trans_kva, 0, 0, occ_type, 1, 1)
+        st.success(f"**Computed Electrical Fee:** ₱{elec_fee:,.2f}")
+        st.session_state.fees["Electrical Installation Fee"] = elec_fee
 
-# --- TAB 3: PLUMBING ---
+# --- TAB 3: MECHANICAL FEES ---
 with tabs[2]:
     col1, col2 = st.columns(2)
     with col1:
-        plumb_units = st.number_input("Plumbing Units Count", min_value=1, value=2)
-        plumb_inst = st.number_input("Plumbing Installation Fee (₱)", min_value=0.0, value=st.session_state.fees["Plumbing Installation Fee"])
-        st.session_state.fees["Plumbing Installation Fee"] = plumb_inst
+        ref_tons = st.number_input("Refrigeration / AC (tons)", min_value=0.0, value=0.0)
+        elev_pass = st.number_input("Passenger Elevators Count", min_value=0, value=0)
+    with col2:
+        mech_fee = compute_mechanical_fees(ref_tons, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0, 0, elev_pass, 0, 0, 0.0, 0, 0.0, 0, 0.0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        st.success(f"**Computed Mechanical Fee:** ₱{mech_fee:,.2f}")
+        st.session_state.fees["Mechanical Installation Fee"] = mech_fee
 
-# --- TAB 4: INSPECTIONS & CERTS ---
+# --- TAB 4: PLUMBING FEES ---
 with tabs[3]:
     col1, col2 = st.columns(2)
     with col1:
-        bldg_insp = st.number_input("Building Annual Inspection Fee (₱)", min_value=0.0, value=st.session_state.fees["Building Inspection Fee"])
-        cert_fee = st.number_input("Certification Fee (5 x ₱50) (₱)", min_value=0.0, value=st.session_state.fees["Certification Fee"])
+        std_units = st.number_input("Standard Plumbing Units", min_value=0, value=1)
+        exc_wc = st.number_input("Excess Water Closets", min_value=0, value=0)
+    with col2:
+        plumbing_fee = compute_plumbing_fees(std_units, exc_wc, 0, 0, 0, 0, 0, {}, 1, 0, 0.0)
+        st.success(f"**Computed Plumbing Fee:** ₱{plumbing_fee:,.2f}")
+        st.session_state.fees["Plumbing Installation Fee"] = plumbing_fee
+
+# --- TAB 5: ELECTRONICS FEES ---
+with tabs[4]:
+    col1, col2 = st.columns(2)
+    with col1:
+        ports = st.number_input("Switching / PABX Ports", min_value=0, value=0)
+        outlets = st.number_input("Electronics Outlets", min_value=0, value=0)
+    with col2:
+        elec_perm_fee = compute_electronics_fees(ports, 0, 0, outlets, 0, 0, 0, 0, 0, 0, 0)
+        st.success(f"**Computed Electronics Fee:** ₱{elec_perm_fee:,.2f}")
+        st.session_state.fees["Electronics Permit Fee"] = elec_perm_fee
+
+# --- TAB 6: ACCESSORIES ---
+with tabs[5]:
+    col1, col2 = st.columns(2)
+    with col1:
+        balcony = st.number_input("Balcony / Terrace Area (sq. meters)", min_value=0.0, value=0.0)
+        pool = st.number_input("Swimming Pool Volume (cu. meters)", min_value=0.0, value=0.0)
+    with col2:
+        acc_fee = compute_accessories_fees(balcony, 10.0, 0.0, 0.0, pool, 0.0, 0.0, 0, 0.0, 0, 0, 0.0, 0, 0.0, 0, 0.0, 0, 0.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        st.success(f"**Computed Accessories Fee:** ₱{acc_fee:,.2f}")
+        st.session_state.fees["Accessories Fee"] = acc_fee
+
+# --- TAB 7: OTHER FEES ---
+with tabs[6]:
+    col1, col2 = st.columns(2)
+    with col1:
+        line_grade = st.number_input("Line and Grade (lineal meters)", min_value=0.0, value=0.0)
+        demolition = st.number_input("Demolition Floor Area (sq. meters)", min_value=0.0, value=0.0)
+    with col2:
+        other_fee = compute_other_fees(line_grade, False, 0.0, False, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, False, 0.0, 0, 0.0, 0, 0.0, 0, 0.0, 0.0, "Neon", "Business", 0.0, "Neon", "Business", 0.0, 0.0, 0.0, demolition, 0.0, 0, 0.0, 0.0)
+        st.success(f"**Computed Other Permits Fee:** ₱{other_fee:,.2f}")
+        st.session_state.fees["Other Permits Fee"] = other_fee
+
+# --- TAB 8: INSPECTIONS & CERTS ---
+with tabs[7]:
+    col1, col2 = st.columns(2)
+    with col1:
+        valuation = st.session_state.get("building_valuation", 750000.0)
+        floor_area_val = st.session_state.get("floor_area", 75.0)
+        occ_cert = compute_occupancy_certificate_fee("A-1", valuation, floor_area_val)
+        bldg_insp = compute_annual_inspection_fees(floor_area_val, 2, st.session_state.fees["Electrical Installation Fee"])
+        st.session_state.fees["Building Occupancy Fee"] = occ_cert
         st.session_state.fees["Building Inspection Fee"] = bldg_insp
+        st.success(f"**Occupancy Certificate Fee:** ₱{occ_cert:,.2f}\n\n**Annual Inspection Fee:** ₱{bldg_insp:,.2f}")
+    with col2:
+        cert_fee = st.number_input("Certification Fee (₱)", min_value=0.0, value=st.session_state.fees["Certification Fee"])
         st.session_state.fees["Certification Fee"] = cert_fee
 
-# --- TAB 5: OFFICIAL ORDER OF PAYMENT ---
-with tabs[4]:
+# --- TAB 9: OFFICIAL ORDER OF PAYMENT (OP) ---
+with tabs[8]:
     col_left, col_right = st.columns([1.1, 1])
     
     total_assessment = sum(st.session_state.fees.values())
@@ -204,7 +279,8 @@ with tabs[4]:
     with col_left:
         st.subheader("Assessed Fee Items")
         for item, amount in st.session_state.fees.items():
-            st.write(f"• **{item}**: ₱{amount:,.2f}")
+            if amount > 0:
+                st.write(f"• **{item}**: ₱{amount:,.2f}")
         st.markdown(f"### **Total Permit Fee: ₱{total_assessment:,.2f}**")
         
     with col_right:
@@ -219,6 +295,12 @@ with tabs[4]:
             header_title = "OFFICE OF THE BUILDING OFFICIAL"
             treasurer_note = "Please pay at the Municipal Treasurer's Office."
 
+        # Receipt Generation HTML matching exact official template
+        receipt_rows = ""
+        for item, amount in st.session_state.fees.items():
+            if amount > 0:
+                receipt_rows += f'<div class="op-row"><span>{item}</span> <span>{amount:,.2f}</span></div>\n'
+
         st.markdown(f"""
         <div class="op-receipt">
             <div class="op-header">
@@ -229,12 +311,7 @@ with tabs[4]:
             <div class="op-row"><span>Date:</span> <span>10/20/2026</span></div>
             <div class="op-row"><span>Units:</span> <span>1</span></div>
             <hr style="border-top: 1px dashed #000; margin: 8px 0;">
-            <div class="op-row"><span>Electrical Installation Fee</span> <span>{st.session_state.fees['Electrical Installation Fee']:.2f}</span></div>
-            <div class="op-row"><span>Plumbing Installation Fee</span> <span>{st.session_state.fees['Plumbing Installation Fee']:.2f}</span></div>
-            <div class="op-row"><span>Building Occupancy Fee</span> <span>{st.session_state.fees['Building Occupancy Fee']:.2f}</span></div>
-            <div class="op-row"><span>Building Inspection Fee</span> <span>{st.session_state.fees['Building Inspection Fee']:.2f}</span></div>
-            <div class="op-row"><span>Certification Fee</span> <span>{st.session_state.fees['Certification Fee']:.2f}</span></div>
-            
+            {receipt_rows}
             <div class="op-total">
                 <div class="op-row"><span>Total Assessment</span> <span>{total_assessment:,.2f}</span></div>
             </div>
