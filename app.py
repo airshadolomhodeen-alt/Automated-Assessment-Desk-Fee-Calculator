@@ -107,7 +107,7 @@ st.markdown("""
         margin-top: 10px;
     }
 </style>
-""", unsafe_allow_shortcut=True)
+""", unsafe_allow_html=True)
 
 # Top Bar
 st.markdown("""
@@ -195,7 +195,7 @@ with tabs[3]:
         st.session_state.fees["Building Inspection Fee"] = bldg_insp
         st.session_state.fees["Certification Fee"] = cert_fee
 
-# --- TAB 5: OFFICIAL ORDER OF PAYMENT (REPLICATING YOUR IMAGE) ---
+# --- TAB 5: OFFICIAL ORDER OF PAYMENT ---
 with tabs[4]:
     col_left, col_right = st.columns([1.1, 1])
     
@@ -219,7 +219,6 @@ with tabs[4]:
             header_title = "OFFICE OF THE BUILDING OFFICIAL"
             treasurer_note = "Please pay at the Municipal Treasurer's Office."
 
-        # Generated Receipt Box matching exact structure from screenshot
         st.markdown(f"""
         <div class="op-receipt">
             <div class="op-header">
