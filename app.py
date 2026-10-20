@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import textwrap
+import streamlit.components.v1 as components
 from utils.building_fees import compute_building_fee, get_fixed_cost_per_sqm
 from utils.electrical_fees import compute_electrical_fees
 from utils.mechanical_fees import compute_mechanical_fees
@@ -17,7 +17,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS for Government Desktop Theme & Order of Payment Modal
+# Custom CSS for Government Desktop Theme
 st.markdown("""
 <style>
     .stApp {
@@ -76,36 +76,6 @@ st.markdown("""
         margin-bottom: 15px;
         text-align: center;
         letter-spacing: 0.5px;
-    }
-
-    .op-receipt {
-        background-color: #ffffff;
-        border: 1px solid #111;
-        padding: 20px;
-        font-family: 'Courier New', Courier, monospace;
-        font-size: 13px;
-        color: #000;
-        box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
-    }
-    .op-header {
-        text-align: center;
-        font-weight: bold;
-        text-transform: uppercase;
-        border-bottom: 1px dashed #000;
-        padding-bottom: 10px;
-        margin-bottom: 10px;
-    }
-    .op-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 4px;
-    }
-    .op-total {
-        border-top: 1px dashed #000;
-        border-bottom: 2px double #000;
-        padding: 6px 0;
-        font-weight: bold;
-        margin-top: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -316,7 +286,41 @@ with tabs[8]:
             if amount > 0:
                 receipt_rows += f'<div class="op-row"><span>{item}</span> <span>{amount:,.2f}</span></div>\n'
 
-        receipt_html = textwrap.dedent(f"""
+        receipt_html = f"""
+        <html>
+        <head>
+        <style>
+            .op-receipt {{
+                background-color: #ffffff;
+                border: 1px solid #111;
+                padding: 20px;
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 13px;
+                color: #000;
+            }}
+            .op-header {{
+                text-align: center;
+                font-weight: bold;
+                text-transform: uppercase;
+                border-bottom: 1px dashed #000;
+                padding-bottom: 10px;
+                margin-bottom: 10px;
+            }}
+            .op-row {{
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 4px;
+            }}
+            .op-total {{
+                border-top: 1px dashed #000;
+                border-bottom: 2px double #000;
+                padding: 6px 0;
+                font-weight: bold;
+                margin-top: 10px;
+            }}
+        </style>
+        </head>
+        <body>
         <div class="op-receipt">
             <div class="op-header">
                 {header_title}<br>
@@ -348,6 +352,8 @@ with tabs[8]:
                 OR No: ___________________
             </div>
         </div>
-        """)
+        </body>
+        </html>
+        """
 
-        st.markdown(receipt_html, unsafe_allow_html=True)
+        components.html(receipt_html, height=480, scrolling=True)
