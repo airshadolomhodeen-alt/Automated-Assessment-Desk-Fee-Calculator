@@ -84,21 +84,19 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# LGU Banner with Native Streamlit Columns for Perfect Logo Alignment
-st.markdown("""
+# LGU Banner with Logo Integrated Inside the Header
+st.markdown(f"""
 <div class="bpfau-banner">
-    <h4 style="margin: 0; font-size: 13px; letter-spacing: 1.5px; color: #d1e8ff; text-transform: uppercase;">Republic of the Philippines</h4>
-    <h2 style="margin: 4px 0; font-size: 20px; font-weight: 800; color: #ffffff;">OFFICE OF THE BUILDING OFFICIAL / BEZA DESK</h2>
-    <p style="margin: 0; font-size: 12px; font-style: italic; color: #ffd700;">"Automated Assessment Desk & Printable Order of Payment Generator"</p>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+        <img src="{logo_data_uri}" style="width: 75px; height: 75px; border-radius: 50%; border: 2px solid #ffd700; object-fit: cover;">
+        <div style="text-align: left;">
+            <h4 style="margin: 0; font-size: 13px; letter-spacing: 1.5px; color: #d1e8ff; text-transform: uppercase;">Republic of the Philippines</h4>
+            <h2 style="margin: 4px 0; font-size: 20px; font-weight: 800; color: #ffffff;">OFFICE OF THE BUILDING OFFICIAL / BEZA DESK</h2>
+            <p style="margin: 0; font-size: 12px; font-style: italic; color: #ffd700;">"Automated Assessment Desk & Printable Order of Payment Generator"</p>
+        </div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
-
-if logo_base64:
-    col_logo, col_banner_text = st.columns([1, 6])
-    with col_logo:
-        st.image(logo_path, width=90)
-    with col_banner_text:
-        st.empty()
 
 # Initialize Session State Database & Records
 if "applicants_db" not in st.session_state:
