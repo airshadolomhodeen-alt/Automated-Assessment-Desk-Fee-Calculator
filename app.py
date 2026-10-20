@@ -24,7 +24,6 @@ st.markdown("""
     .stApp {
         background-color: #eef2f5;
     }
-
     .gov-navbar {
         background-color: #0b1a30;
         padding: 12px 20px;
@@ -36,7 +35,6 @@ st.markdown("""
         margin-bottom: 15px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.15);
     }
-    
     .bpfau-banner {
         background: linear-gradient(135deg, #1b365d 0%, #2a4b7c 100%);
         border: 2px solid #002b49;
@@ -48,25 +46,14 @@ st.markdown("""
         margin-bottom: 15px;
     }
     .bpfau-banner h4 {
-        margin: 0;
-        font-size: 13px;
-        letter-spacing: 1.5px;
-        color: #d1e8ff;
-        text-transform: uppercase;
+        margin: 0; font-size: 13px; letter-spacing: 1.5px; color: #d1e8ff; text-transform: uppercase;
     }
     .bpfau-banner h2 {
-        margin: 4px 0;
-        font-size: 20px;
-        font-weight: 800;
-        color: #ffffff;
+        margin: 4px 0; font-size: 20px; font-weight: 800; color: #ffffff;
     }
     .bpfau-banner p {
-        margin: 0;
-        font-size: 12px;
-        font-style: italic;
-        color: #ffd700;
+        margin: 0; font-size: 12px; font-style: italic; color: #ffd700;
     }
-
     .section-title-bar {
         background-color: #0056b3;
         color: white;
@@ -98,29 +85,23 @@ st.markdown("""
 <div class="bpfau-banner">
     <h4>Republic of the Philippines</h4>
     <h2>OFFICE OF THE BUILDING OFFICIAL / BEZA DESK</h2>
-    <p>"Automated Assessment Desk & Official Order of Payment Generator"</p>
+    <p>"Automated Assessment Desk & Printable Order of Payment Generator"</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar: Authority Mode & Tracking System
-st.sidebar.markdown("### ⚙️ System Controls")
-authority_mode = st.sidebar.selectbox(
-    "Jurisdiction / Authority Mode",
-    ["Standard LGU (80% Local / 20% National)", "BEZA Economic Zone (Direct Ecozone Assessment)"]
-)
-
-workflow_stage = st.sidebar.radio(
-    "Workflow Stage",
-    ["1. Building Permit Stage (Upfront Fees)", "2. Occupancy & Post-Construction Stage"]
-)
-
-# Initialize Tracking and Session Data
-if "tracking_no" not in st.session_state:
-    current_date_str = datetime.datetime.now().strftime("%Y%m%d")
-    st.session_state.tracking_no = f"OBO-{current_date_str}-0142"
-
-if "applicant_name" not in st.session_state:
-    st.session_state.applicant_name = "Airsad R. Olomodin"
+# Initialize Session State Database & Records
+if "applicants_db" not in st.session_state:
+    st.session_state.applicants_db = [
+        {
+            "tracking_no": "OBO-20261020-001",
+            "applicant": "Airsad R. Olomodin",
+            "project": "Commercial Warehouse Building",
+            "stage": "Building Permit Stage",
+            "total_fee": 2222.00,
+            "date": "10/20/2026",
+            "status": "Pending Payment"
+        }
+    ]
 
 if "fees" not in st.session_state:
     st.session_state.fees = {
@@ -140,22 +121,33 @@ if "post_fees" not in st.session_state:
         "Certification Fee": 250.00
     }
 
-st.sidebar.markdown("---")
-st.sidebar.info(f"**Active Tracking No:**\n`{st.session_state.tracking_no}`")
+# Sidebar Navigation
+st.sidebar.markdown("### ⚙️ System Controls")
+portal_mode = st.sidebar.radio(
+    "Portal View",
+    ["📋 Assessment Desk (Applicant)", "📊 OBO Admin Registry (Manager View)"]
+)
 
-# --- STAGE 1: BUILDING PERMIT STAGE ---
-if workflow_stage == "1. Building Permit Stage (Upfront Fees)":
+authority_mode = st.sidebar.selectbox(
+    "Jurisdiction / Authority Mode",
+    ["Standard LGU (80% Local / 20% National)", "BEZA Economic Zone (Direct Ecozone Assessment)"]
+)
+
+# --- VIEW 1: ASSESSMENT DESK (APPLICANT / ESTIMATOR) ---
+if portal_mode == "📋 Assessment Desk (Applicant)":
     st.markdown("""
     <div class="section-title-bar">
-        STAGE 1: BUILDING PERMIT APPLICATION & UPFRONT FEE ASSESSMENT
+        BUILDING PERMIT APPLICATION & FEE ASSESSMENT UTILITY
     </div>
     """, unsafe_allow_html=True)
 
-    col_meta1, col_meta2 = st.columns(2)
+    col_meta1, col_meta2, col_meta3 = st.columns(3)
     with col_meta1:
-        st.session_state.applicant_name = st.text_input("Applicant / Owner Name", value=st.session_state.applicant_name)
+        applicant_name = st.text_input("Applicant / Owner Name", value="Airsad R. Olomodin")
     with col_meta2:
         project_title = st.text_input("Project Name / Description", value="Commercial Warehouse Building")
+    with col_meta3:
+        tracking_no = st.text_input("Tracking Number", value=f"OBO-{datetime.datetime.now().strftime('%Y%m%d')}-0142")
 
     tabs = st.tabs([
         "🏢 Building Fees", 
@@ -165,7 +157,7 @@ if workflow_stage == "1. Building Permit Stage (Upfront Fees)":
         "📡 Electronics Fees", 
         "🏗️ Accessories", 
         "📋 Other Fees", 
-        "📄 Upfront Order of Payment"
+        "📄 Printable Order of Payment"
     ])
 
     with tabs[0]:
@@ -266,12 +258,30 @@ if workflow_stage == "1. Building Permit Stage (Upfront Fees)":
         total_assessment = sum(st.session_state.fees.values())
         
         with col_left:
-            st.subheader("Upfront Permit Fee Items")
+            st.subheader("Assessed Fee Summary")
             for item, amount in st.session_state.fees.items():
                 if amount > 0:
                     st.write(f"• **{item}**: ₱{amount:,.2f}")
-            st.markdown(f"### **Total Upfront Assessment: ₱{total_assessment:,.2f}**")
+            st.markdown(f"### **Total Assessment: ₱{total_assessment:,.2f}**")
             
+            if st.button("💾 Save Application to OBO Registry"):
+                new_record = {
+                    "tracking_no": tracking_no,
+                    "applicant": applicant_name,
+                    "project": project_title,
+                    "stage": "Building Permit Stage",
+                    "total_fee": total_assessment,
+                    "date": datetime.datetime.now().strftime("%m/%d/%Y"),
+                    "status": "Pending Payment"
+                }
+                # Check if tracking exists, update or append
+                existing_idx = next((i for i, item in enumerate(st.session_state.applicants_db) if item["tracking_no"] == tracking_no), None)
+                if existing_idx is not None:
+                    st.session_state.applicants_db[existing_idx] = new_record
+                else:
+                    st.session_state.applicants_db.append(new_record)
+                st.success(f"Application {tracking_no} successfully saved to OBO Registry!")
+
         with col_right:
             if "BEZA" in authority_mode:
                 local_share = total_assessment * 1.00
@@ -289,17 +299,21 @@ if workflow_stage == "1. Building Permit Stage (Upfront Fees)":
                 if amount > 0:
                     receipt_rows += f'<div class="op-row"><span>{item}</span> <span>{amount:,.2f}</span></div>\n'
 
+            # Printable HTML receipt with native JavaScript window.print() button
             receipt_html = f"""
             <html>
             <head>
             <style>
+                body {{ background: #f4f4f4; padding: 10px; font-family: 'Courier New', Courier, monospace; }}
                 .op-receipt {{
                     background-color: #ffffff;
                     border: 1px solid #111;
                     padding: 20px;
-                    font-family: 'Courier New', Courier, monospace;
                     font-size: 13px;
                     color: #000;
+                    max-width: 450px;
+                    margin: auto;
+                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
                 }}
                 .op-header {{
                     text-align: center;
@@ -321,6 +335,25 @@ if workflow_stage == "1. Building Permit Stage (Upfront Fees)":
                     font-weight: bold;
                     margin-top: 10px;
                 }}
+                .print-btn {{
+                    display: block;
+                    width: 100%;
+                    background: #0056b3;
+                    color: white;
+                    border: none;
+                    padding: 10px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    margin-top: 15px;
+                    border-radius: 4px;
+                }}
+                .print-btn:hover {{ background: #003d82; }}
+                @media print {{
+                    body {{ background: #fff; padding: 0; }}
+                    .print-btn {{ display: none; }}
+                    .op-receipt {{ border: none; box-shadow: none; width: 100%; }}
+                }}
             </style>
             </head>
             <body>
@@ -329,13 +362,13 @@ if workflow_stage == "1. Building Permit Stage (Upfront Fees)":
                     {header_title}<br>
                     BUILDING PERMIT ORDER OF PAYMENT
                 </div>
-                <div class="op-row"><span>Tracking No:</span> <span>{st.session_state.tracking_no}</span></div>
-                <div class="op-row"><span>Applicant:</span> <span>{st.session_state.applicant_name}</span></div>
+                <div class="op-row"><span>Tracking No:</span> <span>{tracking_no}</span></div>
+                <div class="op-row"><span>Applicant:</span> <span>{applicant_name}</span></div>
                 <div class="op-row"><span>Date:</span> <span>{datetime.datetime.now().strftime("%m/%d/%Y")}</span></div>
                 <hr style="border-top: 1px dashed #000; margin: 8px 0;">
                 {receipt_rows}
                 <div class="op-total">
-                    <div class="op-row"><span>Total Permit Assessment</span> <span>{total_assessment:,.2f}</span></div>
+                    <div class="op-row"><span>Total Assessment</span> <span>{total_assessment:,.2f}</span></div>
                 </div>
                 <div style="margin-top: 10px;">
                     <div class="op-row"><span>Local Gov't Share (80%)</span> <span>{local_share:,.2f}</span></div>
@@ -352,110 +385,44 @@ if workflow_stage == "1. Building Permit Stage (Upfront Fees)":
                 <div style="margin-top: 10px;">
                     OR No: ___________________
                 </div>
+                <button class="print-btn" onclick="window.print()">🖨️ Print Order of Payment</button>
             </div>
             </body>
             </html>
             """
-            components.html(receipt_html, height=500, scrolling=True)
+            components.html(receipt_html, height=540, scrolling=True)
 
-# --- STAGE 2: OCCUPANCY & POST-CONSTRUCTION STAGE ---
+# --- VIEW 2: OBO ADMIN REGISTRY (MANAGER VIEW) ---
 else:
     st.markdown("""
     <div class="section-title-bar">
-        STAGE 2: OCCUPANCY CERTIFICATE & POST-CONSTRUCTION INSPECTION DESK
+        OBO ADMIN REGISTRY & APPLICANT TRACKING DATABASE
     </div>
     """, unsafe_allow_html=True)
 
-    lookup_track = st.text_input("Enter Project Tracking Number to Load Record", value=st.session_state.tracking_no)
+    st.subheader("📁 Saved Applications & Project Records")
     
-    col_c1, col_c2 = st.columns(2)
-    with col_c1:
-        st.success(f"**Loaded Record for:** {st.session_state.applicant_name}\n\n**Tracking Ref:** `{lookup_track}`")
-        valuation = st.session_state.get("building_valuation", 750000.0)
-        floor_area_val = st.session_state.get("floor_area", 75.0)
-        elec_base = st.session_state.fees.get("Electrical Installation Fee", 230.00)
+    # Convert session state database to DataFrame for tabular display
+    df_db = pd.DataFrame(st.session_state.applicants_db)
+    
+    if not df_db.empty:
+        # Display interactive dataframe with status management
+        st.dataframe(df_db, use_container_width=True)
         
-        occ_cert = compute_occupancy_certificate_fee("A-1", valuation, floor_area_val)
-        bldg_insp = compute_annual_inspection_fees(floor_area_val, 2, elec_base)
+        st.markdown("### 🔍 Record Management & Status Update")
+        selected_track = st.selectbox("Select Tracking Number to Manage", df_db["tracking_no"].tolist())
         
-        st.session_state.post_fees["Building Occupancy Certificate Fee"] = occ_cert
-        st.session_state.post_fees["Annual Inspection Fee"] = bldg_insp
-
-        st.metric("Computed Occupancy Certificate Fee", f"₱{occ_cert:,.2f}")
-        st.metric("Computed Annual Inspection Fee", f"₱{bldg_insp:,.2f}")
-
-    with col_c2:
-        st.subheader("Post-Construction Order of Payment")
-        total_post = sum(st.session_state.post_fees.values())
+        record = next((item for item in st.session_state.applicants_db if item["tracking_no"] == selected_track), None)
         
-        if "BEZA" in authority_mode:
-            p_local = total_post * 1.00
-            p_nat = 0.00
-            p_header = "BANGSAMORO ECONOMIC ZONE AUTHORITY"
-        else:
-            p_local = total_post * 0.80
-            p_nat = total_post * 0.20
-            p_header = "OFFICE OF THE BUILDING OFFICIAL"
-
-        post_rows = ""
-        for item, amount in st.session_state.post_fees.items():
-            post_rows += f'<div class="op-row"><span>{item}</span> <span>{amount:,.2f}</span></div>\n'
-
-        post_receipt_html = f"""
-        <html>
-        <head>
-        <style>
-            .op-receipt {{
-                background-color: #ffffff;
-                border: 1px solid #111;
-                padding: 20px;
-                font-family: 'Courier New', Courier, monospace;
-                font-size: 13px;
-                color: #000;
-            }}
-            .op-header {{
-                text-align: center;
-                font-weight: bold;
-                text-transform: uppercase;
-                border-bottom: 1px dashed #000;
-                padding-bottom: 10px;
-                margin-bottom: 10px;
-            }}
-            .op-row {{
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 4px;
-            }}
-            .op-total {{
-                border-top: 1px dashed #000;
-                border-bottom: 2px double #000;
-                padding: 6px 0;
-                font-weight: bold;
-                margin-top: 10px;
-            }}
-        </style>
-        </head>
-        <body>
-        <div class="op-receipt">
-            <div class="op-header">
-                {p_header}<br>
-                OCCUPANCY & INSPECTION ORDER OF PAYMENT
-            </div>
-            <div class="op-row"><span>Tracking No:</span> <span>{lookup_track}</span></div>
-            <div class="op-row"><span>Applicant:</span> <span>{st.session_state.applicant_name}</span></div>
-            <div class="op-row"><span>Status:</span> <span style="color: green; font-weight: bold;">PROJECT COMPLETED</span></div>
-            <hr style="border-top: 1px dashed #000; margin: 8px 0;">
-            {post_rows}
-            <div class="op-total">
-                <div class="op-row"><span>Total Post-Construction Fee</span> <span>{total_post:,.2f}</span></div>
-            </div>
-            <div style="margin-top: 15px; font-size: 11px;">
-                <strong>Approved by:</strong><br>
-                ENGR. AIRSAD R. OLOMODIN, PhD, PECE<br>
-                Building Official / Economic Zone Engineer
-            </div>
-        </div>
-        </body>
-        </html>
-        """
-        components.html(post_receipt_html, height=420, scrolling=True)
+        if record:
+            col_m1, col_m2 = st.columns(2)
+            with col_m1:
+                st.info(f"**Applicant:** {record['applicant']}\n\n**Project:** {record['project']}\n\n**Total Fee:** ₱{record['total_fee']:,.2f}")
+            with col_m2:
+                new_status = st.selectbox("Update Application Status", ["Pending Payment", "Paid / Permit Issued", "Construction Complete", "Occupancy Certified"], index=["Pending Payment", "Paid / Permit Issued", "Construction Complete", "Occupancy Certified"].index(record["status"]))
+                if st.button("Update Status"):
+                    record["status"] = new_status
+                    st.success(f"Status for {selected_track} updated to **{new_status}**!")
+                    st.rerun()
+    else:
+        st.info("No applicant records found in registry.")
