@@ -31,43 +31,78 @@ logo_path = "BEZA-LOGO-Copy-300x300.png"
 logo_base64 = get_base64_image(logo_path)
 logo_data_uri = f"data:image/png;base64,{logo_base64}" if logo_base64 else ""
 
-# Custom CSS for Government Desktop Theme
+# Custom CSS for Orbit-Inspired Modern Government Dashboard Theme
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
     .stApp {
-        background-color: #eef2f5;
+        background-color: #f5f7fc;
+        font-family: 'Inter', Arial, sans-serif;
+        color: #17233c;
     }
+    
+    /* Orbit-Inspired Top Navbar */
     .gov-navbar {
-        background-color: #0b1a30;
-        padding: 12px 20px;
-        border-radius: 8px;
+        background: #172746;
+        padding: 16px 24px;
+        border-radius: 14px;
         color: white;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 15px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        margin-bottom: 20px;
+        box-shadow: 0 8px 24px rgba(23, 39, 70, 0.12);
     }
+
+    /* Modern Gradient Banner */
     .bpfau-banner {
-        background: linear-gradient(135deg, #1b365d 0%, #2a4b7c 100%);
-        border: 2px solid #002b49;
-        border-radius: 6px;
-        padding: 16px;
+        background: linear-gradient(135deg, #172746 0%, #3467eb 100%);
+        border: none;
+        border-radius: 16px;
+        padding: 22px;
         color: white;
         text-align: center;
-        box-shadow: 0px 3px 6px rgba(0,0,0,0.15);
-        margin-bottom: 15px;
+        box-shadow: 0 10px 30px rgba(52, 103, 235, 0.15);
+        margin-bottom: 22px;
     }
+
+    /* Clean Section Title Bar */
     .section-title-bar {
-        background-color: #0056b3;
-        color: white;
-        padding: 8px 15px;
-        font-weight: bold;
+        background: white;
+        color: #17233c;
+        border: 1px solid #e9edf5;
+        padding: 14px 20px;
+        font-weight: 800;
         font-size: 14px;
-        border-radius: 4px;
-        margin-bottom: 15px;
-        text-align: center;
-        letter-spacing: 0.5px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(35, 58, 101, 0.03);
+        letter-spacing: -0.3px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Sidebar Styling Refinement */
+    [data-testid="stSidebar"] {
+        background-color: #172746;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    [data-testid="stSidebar"] .stRadio label, 
+    [data-testid="stSidebar"] .stSelectbox label, 
+    [data-testid="stSidebar"] h3 {
+        color: #ffffff !important;
+        font-weight: 600;
+    }
+    
+    /* Metric & Card Enhancements */
+    div.stMetric {
+        background: white;
+        padding: 16px;
+        border-radius: 14px;
+        border: 1px solid #e9edf5;
+        box-shadow: 0 5px 18px rgba(35, 58, 101, 0.04);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -75,10 +110,10 @@ st.markdown("""
 # Top Bar
 st.markdown("""
 <div class="gov-navbar">
-    <div style="font-size: 18px; font-weight: bold;">
-        🏛️ OBO Building Permit System &nbsp;|&nbsp; <span style="font-size: 14px; color: #a2c4c9;">Assessment Desk</span>
+    <div style="font-size: 18px; font-weight: 800; letter-spacing: -0.5px;">
+        🏛️ OBO Building Permit System &nbsp;|&nbsp; <span style="font-size: 14px; color: #ff9b5e; font-weight: 600;">Assessment Desk</span>
     </div>
-    <div style="font-size: 13px; font-weight: 500; background: #162c4d; padding: 6px 12px; border-radius: 20px;">
+    <div style="font-size: 12px; font-weight: 600; background: #ffffff18; padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
         NBCDO MC No. 03 (Series of 2016) / PD 1096
     </div>
 </div>
@@ -88,11 +123,11 @@ st.markdown("""
 st.markdown(f"""
 <div class="bpfau-banner">
     <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
-        <img src="{logo_data_uri}" style="width: 75px; height: 75px; border-radius: 50%; border: 2px solid #ffd700; object-fit: cover;">
+        <img src="{logo_data_uri}" style="width: 75px; height: 75px; border-radius: 50%; border: 2px solid #ff9b5e; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
         <div style="text-align: left;">
-            <h4 style="margin: 0; font-size: 13px; letter-spacing: 1.5px; color: #d1e8ff; text-transform: uppercase;">Republic of the Philippines</h4>
-            <h2 style="margin: 4px 0; font-size: 20px; font-weight: 800; color: #ffffff;">OFFICE OF THE BUILDING OFFICIAL / BEZA DESK</h2>
-            <p style="margin: 0; font-size: 12px; font-style: italic; color: #ffd700;">"Automated Assessment Desk & Printable Order of Payment Generator"</p>
+            <h4 style="margin: 0; font-size: 11px; letter-spacing: 2px; color: #a2c4c9; text-transform: uppercase; font-weight: 700;">Republic of the Philippines</h4>
+            <h2 style="margin: 4px 0; font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">OFFICE OF THE BUILDING OFFICIAL / BEZA DESK</h2>
+            <p style="margin: 0; font-size: 12px; font-style: italic; color: #ff9b5e; font-weight: 500;">"Automated Assessment Desk & Printable Order of Payment Generator"</p>
         </div>
     </div>
 </div>
@@ -150,7 +185,7 @@ authority_mode = st.sidebar.selectbox(
 if portal_mode == "📋 Assessment Desk (Building Permit)":
     st.markdown("""
     <div class="section-title-bar">
-        STAGE 1: BUILDING PERMIT APPLICATION & UPFRONT FEE ASSESSMENT
+        <span>📋</span> STAGE 1: BUILDING PERMIT APPLICATION & UPFRONT FEE ASSESSMENT
     </div>
     """, unsafe_allow_html=True)
 
@@ -366,7 +401,7 @@ if portal_mode == "📋 Assessment Desk (Building Permit)":
                 .print-btn {{
                     display: block;
                     width: 100%;
-                    background: #0056b3;
+                    background: #3467eb;
                     color: white;
                     border: none;
                     padding: 10px;
@@ -374,9 +409,9 @@ if portal_mode == "📋 Assessment Desk (Building Permit)":
                     font-weight: bold;
                     cursor: pointer;
                     margin-top: 15px;
-                    border-radius: 4px;
+                    border-radius: 8px;
                 }}
-                .print-btn:hover {{ background: #003d82; }}
+                .print-btn:hover {{ background: #2651d4; }}
                 @media print {{
                     body {{ background: #fff; padding: 0; }}
                     .print-btn {{ display: none; }}
@@ -427,7 +462,7 @@ if portal_mode == "📋 Assessment Desk (Building Permit)":
 elif portal_mode == "🔍 Occupancy & Post-Construction":
     st.markdown("""
     <div class="section-title-bar">
-        STAGE 2: OCCUPANCY CERTIFICATE & POST-CONSTRUCTION INSPECTION DESK
+        <span>🔍</span> STAGE 2: OCCUPANCY CERTIFICATE & POST-CONSTRUCTION INSPECTION DESK
     </div>
     """, unsafe_allow_html=True)
 
@@ -522,7 +557,7 @@ elif portal_mode == "🔍 Occupancy & Post-Construction":
             .print-btn {{
                 display: block;
                 width: 100%;
-                background: #0056b3;
+                background: #3467eb;
                 color: white;
                 border: none;
                 padding: 10px;
@@ -530,9 +565,9 @@ elif portal_mode == "🔍 Occupancy & Post-Construction":
                 font-weight: bold;
                 cursor: pointer;
                 margin-top: 15px;
-                border-radius: 4px;
+                border-radius: 8px;
             }}
-            .print-btn:hover {{ background: #003d82; }}
+            .print-btn:hover {{ background: #2651d4; }}
             @media print {{
                 body {{ background: #fff; padding: 0; }}
                 .print-btn {{ display: none; }}
@@ -582,7 +617,7 @@ elif portal_mode == "🔍 Occupancy & Post-Construction":
 else:
     st.markdown("""
     <div class="section-title-bar">
-        OBO ADMIN REGISTRY & APPLICANT TRACKING DATABASE
+        <span>📊</span> OBO ADMIN REGISTRY & APPLICANT TRACKING DATABASE
     </div>
     """, unsafe_allow_html=True)
 
